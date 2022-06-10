@@ -17,7 +17,7 @@
 
 
 <script>
-import TypeNav from './TypeNav/index.vue';
+import TypeNav from '@/components/TypeNav/index.vue';
 // 引入其余的组件
 import ListContainer from '@/pages/Home/ListContainer'
 import Recommend from './Recommend/index.vue';
