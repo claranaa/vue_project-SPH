@@ -1,12 +1,16 @@
-import { reqCategoryList } from "@/api"
+import { reqCategoryList, reqGetBannerList } from "@/api"
 // home模块的小仓库
 const state = {
   // state中数据默认初始值别瞎写，服务器返回对象初始值就写空对象，是数组就写空数组【是根据接口返回值初始化的】
-  categoryList: []
+  categoryList: [],
+  bannerList: []
 }
 const mutations = {
   CATEGORYLIST (state, categoryList) {
     state.categoryList = categoryList
+  },
+  GETBANNERLIST (state, bannerList) {
+    state.bannerList = bannerList
   }
 }
 const actions = {
@@ -15,6 +19,13 @@ const actions = {
     let result = await reqCategoryList()
     if (result.code == 200) {
       commit("CATEGORYLIST", result.data)
+    }
+  },
+  // 获取首页轮播图的数据
+  async getBannerList ({ commit }) {
+    let result = await reqGetBannerList()
+    if (result.code == 200) {
+      commit("GETBANNERLIST", result.data)
     }
   }
 }

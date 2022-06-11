@@ -64,7 +64,13 @@
         // this.$router.push({path: '/search',params: {keywords: this.keywords},query:{k: this.keywords.toUpperCase()}})
         // this.$router.push({name: 'search',query:{k: this.keywords.toUpperCase()}})
         // this.$router.push({name: 'search',params: {keywords: ''||undefined}, query:{k: this.keywords.toUpperCase()}})
-        this.$router.push({name: "search",params: {keywords: this.keywords},query:{k: this.keywords.toUpperCase()}})
+        
+        // 代表的是如果有query参数也传递过去
+        if (this.$route.query) {
+          let location = {name: "search", params: {keywords: this.keywords || undefined}}
+          location.query = this.$route.query
+          this.$router.push(location)
+        }
         // console.log(this.$router)
       }
     }

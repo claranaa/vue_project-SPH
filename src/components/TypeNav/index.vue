@@ -2,10 +2,12 @@
   <div class="type-nav">
         <div class="container">
             <!-- 事件委派|事件委托 -->
-            <div @mouseleave="leaveIndex">
+            <div @mouseleave="leaveIndex" @mouseenter="enterShow">
                 <h2 class="all">全部商品分类</h2>
                 <!-- 三级联动 -->
-                <div class="sort">
+                <!-- 过渡动画 -->
+                <transition name="sort">
+                    <div class="sort" v-show="show">
                     <!-- 利用事件委派+编程式导航实现路由的跳转与参数传递 -->
                     <div class="all-sort-list2" @click="goSearch">
                         <div class="item bo" v-for="(c1,index) in categoryList" :key="c1.categoryId" :class="{cur:currentIndex==index}">
@@ -29,7 +31,8 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
+                </transition>
             </div>
             <nav class="nav">
                 <a href="###">服装城</a>
@@ -58,13 +61,17 @@ export default {
   data() {
       return {
           // 存储用户鼠标移动到哪一个一级分类
-        currentIndex: -1
+        currentIndex: -1,
+        show: true
       }
   },
   // 组件挂载完毕：可以向服务器发请求
   mounted() {
-      // 通知Vuex发请求，获取数据，存储于仓库当中
-      this.$store.dispatch('categoryList')
+      // 当组件挂载完毕，让show属性变为flase
+      // 如果不是home路由组件，将TypeNav进行隐藏
+      if (this.$route.path!='/home') {
+          this.show = false
+      }
   },
   computed: {
       ...mapState({
@@ -89,6 +96,10 @@ export default {
       leaveIndex() {
           // 鼠标移除currentIndex，变为-1
           this.currentIndex = -1
+          // 当鼠标离开的时候，让搜索模块中的商品分类列表进行隐藏
+          if(this.$route.path!='/home') {
+              this.show = false
+          }
       },
       // 进行路由跳转的方法
       goSearch(event) {
@@ -114,12 +125,20 @@ export default {
             } else {
                 query.category3Id = category3id
             }
-            // 整理完参数
-            location.query = query
-            // 路由跳转
-            this.$router.push(location)
+            // 判断：如果路由跳转的时候，带有params参数，捎带传递过去
+            if (this.$route.params) {
+                location.params = this.$route.params
+                // 整理完参数
+                location.query = query
+                // 路由跳转
+                this.$router.push(location)
+            }
         }
         
+      },
+      // 当鼠标移入的时候，让商品分类列表进行展示
+      enterShow() {
+          this.show = true
       }
   }
 }
@@ -252,6 +271,19 @@ export default {
                         background: skyblue
                     }
                 }
+            }
+            // 过渡动画的样式
+            // 过渡动画开始的状态(进入)
+            .sort-enter {
+                height: 0px
+            }
+            // 过渡动画结束的状态（进入）
+            .sort-enter-to {
+                height: 461px
+            }
+            // 定义动画事件、速率
+            .sort-enter-active {
+                transition: all, .5s linear
             }
         }
     }
