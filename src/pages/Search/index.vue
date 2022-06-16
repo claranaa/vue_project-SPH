@@ -34,25 +34,13 @@
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
-              <!-- 价格结构 -->
+              <!-- 排序结构 -->
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{active: isOne}" @click="changeOrder('1')">
+                  <a>综合<span v-show="isOne" :class="{'icon-arrow-thin-up': isAsc,'icon-arrow-thin-down': isDesc}"></span></a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{active: isTwo}" @click="changeOrder('2')">
+                  <a>价格<span v-show="isTwo" :class="{'icon-arrow-thin-up': isAsc,'icon-arrow-thin-down': isDesc}"></span></a>
                 </li>
               </ul>
             </div>
@@ -327,35 +315,7 @@
             </ul>
           </div>
           <!-- 分页器 -->
-          <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
-          </div>
+          <Pagination :pageNo="searchParams.pageNo" :pageSize="searchParams.pageSize" :total="total" :continues="5" @getPageNo="getPageNo"/>
         </div>
       </div>
     </div>
@@ -363,10 +323,11 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapState } from 'vuex'
 
   import SearchSelector from './SearchSelector/SearchSelector'
-  // import {mapState} from 'vuex'
+  import Pagination from '@/components/Pagination/index.vue'
+  
   export default {
     name: 'Search',
     data() {
@@ -383,12 +344,12 @@
         categoryName: "",
         // 搜索框中的关键字
         keywords: "",
-        // 排序
-        order: "",
-        // 分液器用的：代表的是当前是第几页
+        // 排序:初始的状态应该是综合且降序
+        order: "1:desc",
+        // 分页器用的：代表的是当前是第几页
         pageNo: 1,
         // 代表的是每一页展示数据的个数
-        pageSize: 10,
+        pageSize: 3,
         // 平台售卖属性操作带的参数
         props: [],
         // 品牌
@@ -397,8 +358,9 @@
       }
     },
     components: {
-      SearchSelector
-    },
+    SearchSelector,
+    Pagination
+},
     // 当组件挂载完毕之前执行一次【先于mounted】
     beforeMount() {
       // 复杂的写法
@@ -488,6 +450,34 @@
         this.searchParams.props.splice(index,1)
         // 再次发请求
         this.getData()
+      },
+      // 排序的操作
+      changeOrder(flag) {
+        // flag形参：是一个标记，代表用户点击的是 综合（1）还是价格（2）[用户点击时候传递进来的]
+        // let originOrder = this.searchParams.order
+        // 这里获取到的是最开始的状态
+        let originFlag = this.searchParams.order.split(":")[0]
+        let originSort = this.searchParams.order.split(":")[1]
+        // 准备一个新的order属性值
+        let newOrder = ''
+        if (flag==originFlag) {
+          // 确定用户点击的是相同的按钮
+          newOrder = `${originFlag}:${originSort=="desc"?"asc":"desc"}`
+        } else {
+          // 点击的是不同的按钮
+          newOrder = `${flag}:${'desc'}`
+        }
+        // 将新的Order赋予searchParams
+        this.searchParams.order=newOrder
+        // 再次发请求
+        this.getData()
+      },
+      // 自定义事件的回调函数---获取当前用户点击的第几页
+      getPageNo(pageNo) {
+        // 整理带给服务器的参数
+        this.searchParams.pageNo = pageNo
+        // 再次发请求
+        this.getData()
       }
     },
     /* computed: {
@@ -498,7 +488,23 @@
     } */
     computed: {
       // mapGetters里面的写法：传递的是数组，因为getters计算是没有划分模块的【home，search】
-      ...mapGetters(['goodsList'])
+      ...mapGetters(['goodsList']),
+      isOne() {
+        return this.searchParams.order.indexOf('1')!=-1
+      },
+      isTwo() {
+        return this.searchParams.order.indexOf('2')!=-1
+      },
+      isAsc() {
+        return this.searchParams.order.indexOf('asc')!=-1
+      },
+      isDesc() {
+        return this.searchParams.order.indexOf('desc')!=-1
+      },
+      // 获取search模块展示产品一共多少数据
+      ...mapState({
+        total: state=>state.search.searchList.total
+      })
     },
     // 数据监听：监听组件实例身上的属性的属性值的变化
     watch: {
