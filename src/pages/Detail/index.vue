@@ -353,7 +353,7 @@
   import ImageList from './ImageList/ImageList'
   import Zoom from './Zoom/Zoom'
 
-  import mapGetters from 'vuex'
+  import {mapGetters} from 'vuex'
 
   export default {
     name: 'Detail',
