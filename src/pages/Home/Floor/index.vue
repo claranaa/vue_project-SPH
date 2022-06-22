@@ -76,7 +76,7 @@ export default {
     mounted() {
         // 第一次书写Swiper的时候，在mounted当中书写是不可以的，但是为什么现在这里可以了？
         // 第一次写轮播图的时候，是在当前组件内部发请求、动态渲染结构【前提至少是服务器的数据需要回来】，因此之前在这里的构建Swiper是不可以的
-        // 现在在mounted中书写SSwiper实例为什么可以：因为请求是父组件发的，父组件通过props把数据传递过来，而且在有结构的情况下执行了mounted
+        // 现在在mounted中书写Swiper实例为什么可以：因为请求是父组件发的，父组件通过props把数据传递过来，而且在有结构的情况下执行了mounted
         // 在这里书写就可以，但为了与listContainer组件中的轮播图结构保持一致，写在了watch监听函数中
         /* var mySwiper = new Swiper (this.$refs.floor1Swiper, {
                       loop: true, // 循环模式选项

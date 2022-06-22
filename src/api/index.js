@@ -43,3 +43,6 @@ export const reqFloorList = () => {
   })
 } */
 export const reqGetSearchInfo = params => requests({ url: "/list", method: "post", data: params })
+
+// 获取产品详情信息的接口 URL:/api/item/{ skuId } GET
+export const reqGoodsInfo = skuId => requests({ url: `/item/${skuId}`, method: "get" })

@@ -4,7 +4,13 @@
     <!-- <h1>{{startNumAndEndNum}}-----当前的页码{{pageNo}}</h1> -->
     <!-- 上 -->
     <button :disabled="pageNo==1" @click="$emit('getPageNo',pageNo-1)">上一页</button>
-    <button v-if="startNumAndEndNum.start > 1" @click="$emit('getPageNo',1)" :class="{active: pageNo==1}">1</button>
+    <button 
+    v-if="startNumAndEndNum.start > 1" 
+    @click="$emit('getPageNo',1)" 
+    :class="{active: pageNo==1}"
+    >
+      1
+    </button>
     <button v-if="startNumAndEndNum.start > 2">···</button>
 
     <!-- 中间部分 -->
@@ -24,7 +30,13 @@
     
     <!-- 下 -->
     <button v-if="startNumAndEndNum.end < totalPage - 1">···</button>
-    <button v-if="startNumAndEndNum.end < totalPage" @click="$emit('getPageNo',totalPage)" :class="{active: pageNo==totalPage}">{{totalPage}}</button>
+    <button 
+    v-if="startNumAndEndNum.end < totalPage" 
+    @click="$emit('getPageNo',totalPage)" 
+    :class="{active: pageNo==totalPage}"
+    >
+      {{totalPage}}
+    </button>
     <button :disabled="pageNo==totalPage" @click="$emit('getPageNo',pageNo+1)">下一页</button>
     
     <button style="margin-left: 30px">共 {{total}} 条</button>
@@ -34,6 +46,7 @@
 <script>
   export default {
     name: "Pagination",
+    // 父组件search传递给子组件的数据：当前页，每一页展示多少条数据，数据总个数，连续的页码数
     props: ['pageNo', 'pageSize', 'total', 'continues'],
     computed: {
       // 总共多少页
@@ -43,6 +56,7 @@
       },
       // 计算出连续的页码的起始数字与结束数字[连续页码的数字：至少是5]
       startNumAndEndNum() {
+        // 解构出连续的页码数、当前页码、总页数
         const {continues, pageNo, totalPage} = this
         // 先定义两个变量存储起始数字与结束数字
         let start = 0, end = 0
@@ -58,11 +72,13 @@
           // 结束数字
           end = pageNo + parseInt(continues / 2)
           // 把出现不正常的现象【start数字出现0|负数】纠正
+          // 把非正常情况纠正【pageNo：1、2】
           if(start < 1) {
             start = 1,
             end = continues
           }
           // 把出现不正常的现象【end数字大于总页码的】
+          // 把非正常情况纠正【pageNo：32、33】
           if (end > totalPage) {
             end = totalPage,
             start = totalPage - continues + 1
