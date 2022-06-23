@@ -20,9 +20,9 @@
         <!-- 左侧放大镜区域 -->
         <div class="previewWrap">
           <!--放大镜效果-->
-          <Zoom />
+          <Zoom :skuImageList="skuImageList"/>
           <!-- 小图列表 -->
-          <ImageList />
+          <ImageList :skuImageList="skuImageList"/>
         </div>
         <!-- 右侧选择区域布局 -->
         <div class="InfoWrap">
@@ -67,7 +67,7 @@
           <div class="choose">
             <div class="chooseArea">
               <div class="choosed"></div>
-              <dl>
+              <!-- <dl>
                 <dt class="title">选择颜色</dt>
                 <dd changepirce="0" class="active">金色</dd>
                 <dd changepirce="40">银色</dd>
@@ -90,16 +90,34 @@
                 <dd changepirce="0" class="active">官方标配</dd>
                 <dd changepirce="-240">优惠移动版</dd>
                 <dd changepirce="-390">电信优惠版</dd>
+              </dl> -->
+              <dl v-for="(spuSaleAttr,index) in spuSaleAttrList" :key="spuSaleAttr.id">
+                <dt class="title">{{spuSaleAttr.saleAttrName}}</dt>
+                <!-- <dd changepirce="0" class="active">金色</dd>
+                <dd changepirce="40">银色</dd>
+                <dd changepirce="90">黑色</dd> -->
+                <dd 
+                  changepirce="0" 
+                  :class="{active: spuSaleAttrValue.isChecked==1}" 
+                  v-for="(spuSaleAttrValue,index) in spuSaleAttr.spuSaleAttrValueList" 
+                  :key="spuSaleAttrValue.id"
+                  @click="changeActive(spuSaleAttrValue,spuSaleAttr.spuSaleAttrValueList)"
+                >
+                  {{spuSaleAttrValue.saleAttrValueName}}
+                </dd>
               </dl>
             </div>
             <div class="cartWrap">
               <div class="controls">
-                <input autocomplete="off" class="itxt">
-                <a href="javascript:" class="plus">+</a>
-                <a href="javascript:" class="mins">-</a>
+                <input autocomplete="off" class="itxt" v-model="skuNum" @change="changeSkuNum">
+                <a href="javascript:" class="plus" @click="skuNum++">+</a>
+                <a href="javascript:" class="mins" @click="skuNum>1?skuNum--:skuNum=1">-</a>
               </div>
               <div class="add">
-                <a href="javascript:">加入购物车</a>
+                <!-- 以前咱们的路由跳转：从A路由跳转到B路由，
+                这里在加入购物车，进行路由跳转之前，发请求， 
+                把你加购的产品的信息通过请求的形式通知服务器，服务器进行相应的存储 -->
+                <a @click="addShopCar">加入购物车</a>
               </div>
             </div>
           </div>
@@ -357,7 +375,12 @@
 
   export default {
     name: 'Detail',
-    
+    data() {
+      return {
+        // 购买产品的个数
+        skuNum: 1
+      }
+    },
     components: {
       ImageList,
       Zoom
@@ -367,7 +390,66 @@
       this.$store.dispatch('getGoodInfo',this.$route.params.skuid)
   },
   computed: {
-    ...mapGetters(['categoryView','skuInfo'])
+    ...mapGetters(['categoryView', 'skuInfo','spuSaleAttrList']),
+    // 给子组件的数据
+    skuImageList() {
+      // 如果服务器的数据没有回来，skuInfo这个对象是空对象
+      return this.skuInfo.skuImageList || []
+    }
+  },
+  methods: {
+    // 产品的售卖属性值切换高亮
+    changeActive(saleAttrValue,arr) {
+      // 遍历全部售卖属性值isChecked为零没有高亮了
+      arr.forEach(item => {
+        item.isChecked = '0'
+      })
+      // 点击的那个售卖属性值
+      saleAttrValue.isChecked = 1
+    },
+    // 表单元素修改产品的个数
+    changeSkuNum(event) {
+      // 用户输入进来的文本*1
+      let value = event.target.value * 1
+      // 如果用户输入进来的是非法的，出现的NaN或者小于1
+      if (isNaN(value) || value < 1) {
+        console.log('非法')
+        this.skuNum = 1
+      } else {
+        // 正常大于1【大于1的整数，不能出现小数】
+        this.skuNum = parseInt(value)
+      }
+    },
+    // 加入购物车的回调函数
+    async addShopCar() {
+      // 1：发请求---将产品加入到数据库（通知服务器加入购物车的产品是什么）
+      // 当前这里是派发了action，也向服务器发请求了
+      // 判断加入购物车是成功了还是失败了，进行相应的操作
+      // dispatch说白了是在调用仓库中的addOrUpdateShopCart函数，这个函数加上async，返回的一定是一个Promise
+      // Promise返回的结果要么成功，要么失败
+      try {
+        // try是成功干什么
+        // 2: 服务器存储成功-----进行路由跳转并传递参数
+        await this.$store.dispatch('addOrUpdateShopCart', {
+          skuId: this.$route.params.skuid,
+          skuNum: this.skuNum
+        })
+        // 路由跳转
+        // 在路由跳转的时候还需要将产品信息带给下一级的路由组件
+        // 可以用下面这种手段路由跳转以及传递参数，但是skuInfo是一个对象在地址栏中看着不美观，需要用到会话存储
+        // this.$router.push({name: 'addcartsuccess',query: {skuInfo: this.skuInfo,skuNum: this.skuNum}})
+        sessionStorage.setItem("SKUINFO",JSON.stringify(this.skuInfo))
+        this.$router.push({ name: 'addcartsuccess', query: { skuNum: this.skuNum } })
+
+      } catch (error) {
+        // catch是失败干什么
+        // 3: 失败，给用户进行提示
+        alert(error.message)
+      }
+      
+      
+      
+    }
   }
 }
 </script>

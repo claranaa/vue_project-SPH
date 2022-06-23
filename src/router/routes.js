@@ -4,6 +4,7 @@ import Search from "@/pages/Search/index.vue"
 import Login from "@/pages/Login/index.vue"
 import Register from "@/pages/Register/index.vue"
 import Detail from "@/pages/Detail/index.vue"
+import AddCartSuccess from "@/pages/AddCartSuccess/index.vue"
 
 // 路由配置信息
 export default [
@@ -43,6 +44,12 @@ export default [
   {
     path: "/detail/:skuid",
     component: Detail,
+    meta: { show: true }
+  },
+  {
+    path: "/addcartsuccess",
+    name: "addcartsuccess",
+    component: AddCartSuccess,
     meta: { show: true }
   },
   // 重定向，在项目跑起来的时候，访问/,立马让他定向到首页
