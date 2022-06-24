@@ -5,6 +5,7 @@ import Login from "@/pages/Login/index.vue"
 import Register from "@/pages/Register/index.vue"
 import Detail from "@/pages/Detail/index.vue"
 import AddCartSuccess from "@/pages/AddCartSuccess/index.vue"
+import ShopCart from "@/pages/ShopCart/index.vue"
 
 // 路由配置信息
 export default [
@@ -50,6 +51,11 @@ export default [
     path: "/addcartsuccess",
     name: "addcartsuccess",
     component: AddCartSuccess,
+    meta: { show: true }
+  },
+  {
+    path: "/shopcart",
+    component: ShopCart,
     meta: { show: true }
   },
   // 重定向，在项目跑起来的时候，访问/,立马让他定向到首页

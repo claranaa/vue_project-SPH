@@ -398,7 +398,7 @@
     }
   },
   methods: {
-    // 产品的售卖属性值切换高亮
+    // 产品的售卖属性值切换高亮，排他思想
     changeActive(saleAttrValue,arr) {
       // 遍历全部售卖属性值isChecked为零没有高亮了
       arr.forEach(item => {
@@ -413,7 +413,7 @@
       let value = event.target.value * 1
       // 如果用户输入进来的是非法的，出现的NaN或者小于1
       if (isNaN(value) || value < 1) {
-        console.log('非法')
+        // console.log('非法')
         this.skuNum = 1
       } else {
         // 正常大于1【大于1的整数，不能出现小数】
@@ -436,8 +436,11 @@
         })
         // 路由跳转
         // 在路由跳转的时候还需要将产品信息带给下一级的路由组件
-        // 可以用下面这种手段路由跳转以及传递参数，但是skuInfo是一个对象在地址栏中看着不美观，需要用到会话存储
+        // 可以用下面这种手段路由跳转以及传递参数，但是skuInfo是一个对象在地址栏中转成字符串看着不美观，需要用到会话存储
         // this.$router.push({name: 'addcartsuccess',query: {skuInfo: this.skuInfo,skuNum: this.skuNum}})
+        // 一些简单的数据skuNum，通过query形式给路由组件传递过去
+        // 产品信息的数据【比较复杂：skuInfo】，通过会话存储（不持久化，会话结束数据再消失）
+        // 本地存储|会话存储，一般存储的是字符串
         sessionStorage.setItem("SKUINFO",JSON.stringify(this.skuInfo))
         this.$router.push({ name: 'addcartsuccess', query: { skuNum: this.skuNum } })
 
