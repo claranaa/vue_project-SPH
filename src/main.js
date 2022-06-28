@@ -4,10 +4,16 @@ import App from "./App.vue"
 import TypeNav from "@/components/TypeNav"
 import Carousel from "@/components/Carousel"
 import Pagination from "@/components/Pagination"
+import { Button, MessageBox } from "element-ui"
 // 第一个参数：全局组件的名字 第二个参数：哪一个组件
 Vue.component(TypeNav.name, TypeNav)
 Vue.component(Carousel.name, Carousel)
 Vue.component(Pagination.name, Pagination)
+// 注册全局组件，第一种写法
+Vue.component(Button.name, Button)
+// ElementUI注册组件的第二种写法，挂在原型上
+Vue.prototype.$msgbox = MessageBox
+Vue.prototype.$alert = MessageBox.alert
 // 引入路由
 import router from "@/router"
 // 引入仓库
@@ -19,6 +25,10 @@ reqCategoryList() */
 import "@/mock/mockServe"
 // 引入swiper样式
 import "swiper/css/swiper.css"
+// 统一接收api文件夹里面全部请求函数
+// 统一引入
+import * as API from "@/api"
+// console.log(API)
 
 Vue.config.productionTip = false
 
@@ -27,6 +37,7 @@ new Vue({
   // 全局事件总线$bus配置
   beforeCreate () {
     Vue.prototype.$bus = this
+    Vue.prototype.$API = API
   },
   // 注册路由:底下的写法是kv一致省略v【router】小写的
   // 注册路由信息：当这里书写router的时候，组件身上拥有$route,$router属性

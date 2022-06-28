@@ -30,6 +30,7 @@
                 </label>
                 <span class="forget">忘记密码？</span>
               </div>
+              <!-- 阻止按钮的默认跳转行为 -->
               <button class="btn" @click.prevent="userLogin">登&nbsp;&nbsp;录</button>
             </form>
 

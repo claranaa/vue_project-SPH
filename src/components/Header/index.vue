@@ -101,7 +101,7 @@
         })
     },
   computed: {
-      // 用户名信息
+      // 从仓库捞取用户名信息
       userName() {
         return this.$store.state.user.userInfo.name
       }
