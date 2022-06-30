@@ -159,7 +159,6 @@ import { mapState } from 'vuex'
           orderComment: this.msg, // 买家的留言
           orderDetailList: this.orderInfo.detailArrayList // 购物车的商品清单
         }
-        // 需要带参数的：tradeNo
         let result = await this.$API.reqSubmitOrder(tradeNo, data)
         // 提交订单成功
         if (result.code == 200) {

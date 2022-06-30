@@ -83,11 +83,15 @@
 </template>
 
 <script>
+import QRCode from 'qrcode'
   export default {
     name: 'Pay',
     data() {
       return {
-        payInfo: {}
+        payInfo: {},
+        timer: null,
+        // 支付状态码
+        code: ''
       }
     },
     computed: {
@@ -109,8 +113,10 @@
         }
       },
       // 遮罩层|弹出框
-      open() {
-        this.$alert('<strong>这是 <i>HTML</i> 片段</strong>', 'HTML 片段', {
+      async open() {
+        // 生成二维码(地址)
+        let url = await QRCode.toDataURL(this.payInfo.codeUrl)
+        this.$alert(`<img src=${url} />`, '请你微信支付', {
           dangerouslyUseHTMLString: true,
           // 中间布局
           center: true,
@@ -121,8 +127,54 @@
           // 确定按钮的文本内容
           confirmButtonText: '已支付成功',
           // 是否显示右上角的关闭按钮
-          showClose: false
+          showClose: false,
+          // 关闭弹出框的配置
+          beforeClose: (type,instance,done) => {
+            // type：区分是取消|确定按钮
+            // instance：当前组件实例
+            // done：关闭弹出框的方法
+            if (type == 'cancel') {
+              alert('请联系管理员')
+              clearInterval(this.timer)
+              this.timer = null
+              // 关闭弹出框
+              done()
+            } else {
+              // 判断是否真的支付了
+              /* if (this.code == 200) {
+                clearInterval(this.timer)
+                this.timer = null
+                done()    
+                this.$router.push('/paysuccess')
+              } */
+              clearInterval(this.timer)
+              this.timer = null
+              done()    
+              this.$router.push('/paysuccess')
+            }
+          }
         })
+        // 需要知道支付成功|失败
+        // 支付成功，路由跳转
+        // 没有定时器，要开启一个新的定时器
+        if (!this.timer) {
+          this.timer = setInterval(async () => {
+            // 发请求获取用户的支付状态
+            let result = await this.$API.reqPayStatus(this.orderId)
+            if (result.code == 200) {
+              // 第一步：清除定时器
+              clearInterval(this.timer)
+              this.timer = null
+              // 第二步：保存支付成功返回的code
+              this.code = result.code
+              // 第三步：隐藏微信支付弹出层
+              this.$msgbox.close()
+              // 跳转到下一个路由(支付成功)
+              this.$router.push('/paysuccess')
+            }
+          },1000)
+        }
+        // 支付失败，提示信息
       }
     }
   }
